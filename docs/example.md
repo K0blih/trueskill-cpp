@@ -29,6 +29,20 @@ int main() {
     std::cout << "1v1 quality: " << env.quality_1vs1(player_a, player_b) << '\n';
     std::cout << "winner exposure: " << env.expose(winner) << '\n';
 
+    skill_rating::RatingGroups free_for_all = {
+        {env.create_rating(31.0, 6.5)},
+        {env.create_rating(28.0, 7.0)},
+        {env.create_rating(24.0, 8.0)},
+        {env.create_rating(22.0, 8.5)},
+    };
+
+    // Free-for-all is represented as one player per team. Lower rank is better:
+    // player 3 wins, player 1 is second, player 2 is third, player 4 is last.
+    std::vector<int> free_for_all_ranks = {1, 2, 0, 3};
+
+    skill_rating::RatingGroups updated_free_for_all = env.rate(free_for_all, free_for_all_ranks);
+    print_rating("free-for-all winner", updated_free_for_all[2][0]);
+
     skill_rating::RatingGroups teams = {
         {env.create_rating(32.0, 7.0)},
         {env.create_rating(), env.create_rating(27.0, 6.0)},
