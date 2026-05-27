@@ -24,7 +24,6 @@ monitoring.
 
 ## Planned additions
 
-- Install/export rules for package-manager consumption.
 - Richer CLI ergonomics, examples, and shell-completion support.
 - Richer HTTP service ergonomics, observability, and deployment examples.
 - Serialization helpers for common request/response formats.
