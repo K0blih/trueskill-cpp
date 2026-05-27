@@ -50,16 +50,43 @@ Important pieces:
 These types are internal on purpose. Users should work with `Rating` and
 `Environment`, not factor graph primitives.
 
+## `src/app/*`
+
+This layer is shared by the CLI and HTTP service.
+
+Responsibilities:
+
+- Parse JSON request bodies with `nlohmann/json`.
+- Convert JSON into `Rating`, `RatingGroups`, ranks, weights, and environment values.
+- Dispatch commands such as `rate`, `rate-1vs1`, `quality`, `quality-1vs1`, and `expose`.
+- Print JSON responses.
+
+Keeping this layer separate means the core `trueskill` library does not depend
+on frontend JSON or HTTP dependencies.
+
 ## `src/cli/main.cpp`
 
 This file implements the basic JSON CLI.
 
 Responsibilities:
 
-- Parse small JSON request bodies without third-party dependencies.
-- Convert JSON into `Rating`, `RatingGroups`, ranks, weights, and environment values.
-- Dispatch commands such as `rate`, `rate-1vs1`, `quality`, `quality-1vs1`, and `expose`.
-- Print JSON responses.
+- Read JSON from a file, stdin, or a command argument.
+- Call the shared app command handler.
+- Print the JSON response or a readable error.
+
+## `src/http/main.cpp`
+
+This file implements the basic HTTP service.
+
+Responsibilities:
+
+- Serve HTTP routes with `cpp-httplib`.
+- Route `POST` requests to the shared app command handler.
+- Return JSON responses and JSON errors.
+- Provide `GET /health` for smoke tests.
+
+The service is intentionally still simple: no TLS, authentication, metrics, or
+deployment packaging yet.
 
 ## `tests/trueskill_tests.cpp`
 
@@ -73,3 +100,12 @@ directly:
 The tests currently cover default values, 1v1 quality, wins, draws, team
 matches, ranks, partial-play weights, zero-weight players, custom environments,
 draw helper round trips, multi-team draws, and validation errors.
+
+## `tests/http_smoke.sh`
+
+This script starts the HTTP service on loopback, checks `/health`, calls
+every JSON route, checks common error status codes, and then stops the service.
+
+## `tests/cli_smoke.sh`
+
+This script exercises every CLI command, stdin input, and a validation failure.

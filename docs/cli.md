@@ -1,7 +1,7 @@
 # CLI Usage
 
-The CLI target is `trueskill_cli`. It reads JSON from a file, a JSON command
-argument, or stdin.
+The CLI target is `trueskill_cli`. It uses `nlohmann/json` and reads JSON from a
+file, a JSON command argument, or stdin.
 
 ```sh
 ./build/trueskill_cli <command> [input.json|-|json]
@@ -105,7 +105,7 @@ Input:
 Output:
 
 ```json
-{"quality": 0.4472135955}
+{"quality": 0.4472135954999723}
 ```
 
 ## `quality-1vs1`
@@ -122,7 +122,7 @@ Input:
 Output:
 
 ```json
-{"quality": 0.4472135955}
+{"quality": 0.4472135954999723}
 ```
 
 ## `expose`

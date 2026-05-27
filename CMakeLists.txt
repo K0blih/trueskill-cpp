@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 3.16)
 
 project(trueskill_cpp VERSION 0.1.0 LANGUAGES CXX)
 
+include(FetchContent)
+
+option(TRUESKILL_BUILD_TESTS "Build TrueSkill tests" ON)
+option(TRUESKILL_BUILD_CLI "Build TrueSkill CLI" ON)
+option(TRUESKILL_BUILD_HTTP "Build TrueSkill HTTP service" ON)
+
 add_library(
     trueskill
     src/detail/factor_graph.cpp
@@ -21,12 +27,42 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-option(TRUESKILL_BUILD_TESTS "Build TrueSkill tests" ON)
-option(TRUESKILL_BUILD_CLI "Build TrueSkill CLI" ON)
+if(TRUESKILL_BUILD_CLI OR TRUESKILL_BUILD_HTTP)
+    set(JSON_BuildTests OFF CACHE INTERNAL "")
+    FetchContent_Declare(
+        nlohmann_json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG v3.12.0
+    )
+    FetchContent_MakeAvailable(nlohmann_json)
+
+    add_library(
+        trueskill_app
+        src/app/commands.cpp
+        src/app/json.cpp
+    )
+    target_compile_features(trueskill_app PUBLIC cxx_std_20)
+    target_include_directories(trueskill_app PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(trueskill_app PUBLIC trueskill::trueskill nlohmann_json::nlohmann_json)
+endif()
 
 if(TRUESKILL_BUILD_CLI)
     add_executable(trueskill_cli src/cli/main.cpp)
-    target_link_libraries(trueskill_cli PRIVATE trueskill::trueskill)
+    target_include_directories(trueskill_cli PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(trueskill_cli PRIVATE trueskill_app)
+endif()
+
+if(TRUESKILL_BUILD_HTTP)
+    FetchContent_Declare(
+        cpp_httplib
+        GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
+        GIT_TAG v0.26.0
+    )
+    FetchContent_MakeAvailable(cpp_httplib)
+
+    add_executable(trueskill_http src/http/main.cpp)
+    target_include_directories(trueskill_http PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(trueskill_http PRIVATE trueskill_app httplib::httplib)
 endif()
 
 if(TRUESKILL_BUILD_TESTS)
@@ -36,8 +72,14 @@ if(TRUESKILL_BUILD_TESTS)
     add_test(NAME trueskill_tests COMMAND trueskill_tests)
     if(TRUESKILL_BUILD_CLI)
         add_test(
-            NAME trueskill_cli_quality_smoke
-            COMMAND trueskill_cli quality "{\"rating_groups\":[[{\"mu\":25,\"sigma\":8.333333333333}],[{\"mu\":25,\"sigma\":8.333333333333}]]}"
+            NAME trueskill_cli_smoke
+            COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/cli_smoke.sh $<TARGET_FILE:trueskill_cli>
+        )
+    endif()
+    if(TRUESKILL_BUILD_HTTP)
+        add_test(
+            NAME trueskill_http_smoke
+            COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/http_smoke.sh $<TARGET_FILE:trueskill_http> 18080
         )
     endif()
 endif()

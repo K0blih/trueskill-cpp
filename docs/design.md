@@ -36,14 +36,13 @@ The nested include folder lets users write:
 This avoids collisions with other libraries that might also have a file named
 `rating.hpp`, `environment.hpp`, or `trueskill.hpp` once installed.
 
-## Dependency-Free Core
+## Dependency-Light Core
 
-The core library currently uses only the C++ standard library.
+The core rating library currently uses only the C++ standard library.
 
-That is why the normal distribution helpers, inverse CDF, and small matrix
-helpers are implemented locally. This makes the first version easy to build and
-embed. Later frontends can add their own dependencies without forcing them into
-the core algorithm library.
+The CLI and HTTP service use `nlohmann/json` for JSON and `cpp-httplib` for the
+HTTP server. They are kept outside the core `trueskill` target so library users
+do not inherit frontend dependencies unless they build those targets.
 
 ## Factor Graph Style
 
