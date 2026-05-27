@@ -11,7 +11,7 @@ implementation are large enough that hiding them in `.cpp` files is cleaner.
 
 ## Public API Separate From Internals
 
-Public API lives in `include/trueskill/trueskill.hpp`. Internal implementation
+Public API lives in `include/skill_rating/skill_rating.hpp`. Internal implementation
 lives in `src/detail/`.
 
 This keeps users on stable concepts:
@@ -25,28 +25,32 @@ This keeps users on stable concepts:
 It avoids exposing implementation details like Gaussian precision math and
 message passing.
 
-## `include/trueskill/` Folder
+## `include/skill_rating/` Folder
 
 The nested include folder lets users write:
 
 ```cpp
-#include <trueskill/trueskill.hpp>
+#include <skill_rating/skill_rating.hpp>
 ```
 
 This avoids collisions with other libraries that might also have a file named
-`rating.hpp`, `environment.hpp`, or `trueskill.hpp` once installed.
+`rating.hpp`, `environment.hpp`, or `skill_rating.hpp` once installed.
 
 ## Dependency-Light Core
 
 The core rating library currently uses only the C++ standard library.
 
 The CLI and HTTP service use `nlohmann/json` for JSON and `cpp-httplib` for the
-HTTP server. They are kept outside the core `trueskill` target so library users
+HTTP server. They are kept outside the core `skill_rating` target so library users
 do not inherit frontend dependencies unless they build those targets.
+
+The install/export package only installs the core library target and public
+headers. CLI and HTTP frontends are build targets, not part of the core package
+contract.
 
 ## Factor Graph Style
 
-The rating update follows the classic TrueSkill factor-graph approach instead of
+The rating update follows the classic Bayesian skill rating factor-graph approach instead of
 using only closed-form 1v1 formulas.
 
 That choice matters because the library needs to support:

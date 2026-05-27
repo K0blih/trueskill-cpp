@@ -4,7 +4,7 @@
 #include <utility>
 #include <vector>
 
-namespace trueskill {
+namespace skill_rating {
 
 struct Rating {
     double mu;
@@ -63,4 +63,4 @@ private:
 [[nodiscard]] double calc_draw_margin(double draw_probability, std::size_t player_count, double beta);
 [[nodiscard]] double calc_draw_probability(double draw_margin, std::size_t player_count, double beta);
 
-} // namespace trueskill
+} // namespace skill_rating

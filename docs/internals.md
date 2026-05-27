@@ -3,7 +3,7 @@
 The public header is intentionally small. Most implementation details live under
 `src/`.
 
-## `src/trueskill.cpp`
+## `src/skill_rating.cpp`
 
 This file connects the public API to the algorithm internals.
 
@@ -34,7 +34,7 @@ The inverse CDF is implemented locally to keep the library dependency-free.
 
 ## `src/detail/factor_graph.*`
 
-This module contains the TrueSkill message-passing primitives.
+This module contains the Bayesian skill rating message-passing primitives.
 
 Important pieces:
 
@@ -61,7 +61,7 @@ Responsibilities:
 - Dispatch commands such as `rate`, `rate-1vs1`, `quality`, `quality-1vs1`, and `expose`.
 - Print JSON responses.
 
-Keeping this layer separate means the core `trueskill` library does not depend
+Keeping this layer separate means the core `skill_rating` library does not depend
 on frontend JSON or HTTP dependencies.
 
 ## `src/cli/main.cpp`
@@ -88,13 +88,13 @@ Responsibilities:
 The service is intentionally still simple: no TLS, authentication, metrics, or
 deployment packaging yet.
 
-## `tests/trueskill_tests.cpp`
+## `tests/skill_rating_tests.cpp`
 
 The tests use a small custom runner. It prints named pass/fail lines when run
 directly:
 
 ```sh
-./build/trueskill_tests
+./build/skill_rating_tests
 ```
 
 The tests currently cover default values, 1v1 quality, wins, draws, team
@@ -109,3 +109,9 @@ every JSON route, checks common error status codes, and then stops the service.
 ## `tests/cli_smoke.sh`
 
 This script exercises every CLI command, stdin input, and a validation failure.
+
+## `tests/package_install_smoke.sh`
+
+This script installs the core library into a temporary prefix, configures a
+separate consumer project with `find_package(skill_rating_cpp REQUIRED)`, builds it,
+and runs it.

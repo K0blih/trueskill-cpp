@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace trueskill::app {
+namespace skill_rating::app {
 namespace {
 
 const Json* find(const Json& object, std::string_view key) {
@@ -147,4 +147,4 @@ std::string error_json(std::string_view message) {
     return Json{{"error", std::string(message)}}.dump();
 }
 
-} // namespace trueskill::app
+} // namespace skill_rating::app

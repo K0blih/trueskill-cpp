@@ -1,14 +1,19 @@
-# trueskill-cpp
-C++ implementation of the Microsoft TrueSkill rating algorithm
+# skill-rating-cpp
+C++ implementation of a Bayesian skill rating algorithm
 
 ## Status
 
 This repository currently provides the core C++20 library, a basic JSON CLI, and
 a basic JSON HTTP service.
 
+The HTTP service is intentionally basic. It is suitable for local development
+and controlled internal use, but should not be exposed directly to the public
+internet without TLS termination, authentication, request limits, logging, and
+monitoring.
+
 ## Current capabilities
 
-- Create ratings with the standard TrueSkill defaults or custom environment values.
+- Create ratings with standard Bayesian skill rating defaults or custom environment values.
 - Update ratings for one-vs-one matches, team matches, free-for-all matches, and draws.
 - Use explicit ranks where lower rank means a better result.
 - Use partial-play weights for players who contributed less than a full match.
@@ -23,12 +28,40 @@ a basic JSON HTTP service.
 - Richer CLI ergonomics, examples, and shell-completion support.
 - Richer HTTP service ergonomics, observability, and deployment examples.
 - Serialization helpers for common request/response formats.
-- More golden tests against the Python reference implementation.
 
 ## Build And Test
 
 The core library has no third-party runtime dependency. Building the CLI or HTTP
 service fetches `nlohmann/json` and `cpp-httplib` with CMake `FetchContent`.
+
+## Third-Party Dependencies
+
+The core library target uses only the C++ standard library.
+
+Optional frontend targets fetch these MIT-licensed dependencies at configure
+time:
+
+- `nlohmann/json`: https://github.com/nlohmann/json
+- `cpp-httplib`: https://github.com/yhirose/cpp-httplib
+
+### Installable Package
+
+Install the core library and CMake package files:
+
+```sh
+mkdir -p build
+cd build
+cmake .. -DSKILL_RATING_BUILD_TESTS=OFF -DSKILL_RATING_BUILD_CLI=OFF -DSKILL_RATING_BUILD_HTTP=OFF
+make -j
+cmake --install . --prefix /path/to/install
+```
+
+Use it from another CMake project:
+
+```cmake
+find_package(skill_rating_cpp REQUIRED)
+target_link_libraries(my_app PRIVATE skill_rating::skill_rating)
+```
 
 ### Library
 
@@ -37,7 +70,7 @@ Build only the core library:
 ```sh
 mkdir -p build
 cd build
-cmake .. -DTRUESKILL_BUILD_TESTS=OFF -DTRUESKILL_BUILD_CLI=OFF -DTRUESKILL_BUILD_HTTP=OFF
+cmake .. -DSKILL_RATING_BUILD_TESTS=OFF -DSKILL_RATING_BUILD_CLI=OFF -DSKILL_RATING_BUILD_HTTP=OFF
 make -j
 ```
 
@@ -46,10 +79,10 @@ Build the library with tests:
 ```sh
 mkdir -p build
 cd build
-cmake .. -DTRUESKILL_BUILD_TESTS=ON -DTRUESKILL_BUILD_CLI=OFF -DTRUESKILL_BUILD_HTTP=OFF
+cmake .. -DSKILL_RATING_BUILD_TESTS=ON -DSKILL_RATING_BUILD_CLI=OFF -DSKILL_RATING_BUILD_HTTP=OFF
 make -j
 ctest --output-on-failure
-./trueskill_tests
+./skill_rating_tests
 ```
 
 ### CLI
@@ -59,15 +92,15 @@ Build the CLI with the library and `nlohmann/json`:
 ```sh
 mkdir -p build
 cd build
-cmake .. -DTRUESKILL_BUILD_CLI=ON
+cmake .. -DSKILL_RATING_BUILD_CLI=ON
 make -j
-./trueskill_cli --help
+./skill_rating_cli --help
 ```
 
 Run a direct CLI smoke check:
 
 ```sh
-./trueskill_cli quality '{"rating_groups":[[{"mu":25,"sigma":8.333333333333}],[{"mu":25,"sigma":8.333333333333}]]}'
+./skill_rating_cli quality '{"rating_groups":[[{"mu":25,"sigma":8.333333333333}],[{"mu":25,"sigma":8.333333333333}]]}'
 ```
 
 When tests are enabled, CTest also runs `tests/cli_smoke.sh`, which covers all
@@ -80,9 +113,9 @@ Build the HTTP service with the library, `nlohmann/json`, and `cpp-httplib`:
 ```sh
 mkdir -p build
 cd build
-cmake .. -DTRUESKILL_BUILD_HTTP=ON
+cmake .. -DSKILL_RATING_BUILD_HTTP=ON
 make -j
-./trueskill_http --host 127.0.0.1 --port 8080
+./skill_rating_http --host 127.0.0.1 --port 8080
 ```
 
 In another shell:
@@ -99,7 +132,7 @@ Run all enabled tests, including CLI and HTTP smoke tests:
 ```sh
 mkdir -p build
 cd build
-cmake .. -DTRUESKILL_BUILD_TESTS=ON -DTRUESKILL_BUILD_CLI=ON -DTRUESKILL_BUILD_HTTP=ON
+cmake .. -DSKILL_RATING_BUILD_TESTS=ON -DSKILL_RATING_BUILD_CLI=ON -DSKILL_RATING_BUILD_HTTP=ON
 make -j
 ctest --output-on-failure
 ```

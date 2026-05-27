@@ -1,8 +1,8 @@
 # Public API Overview
 
-The public API lives in `include/trueskill/trueskill.hpp`.
+The public API lives in `include/skill_rating/skill_rating.hpp`.
 
-## `trueskill::Rating`
+## `skill_rating::Rating`
 
 `Rating` stores a player's current skill estimate:
 
@@ -11,10 +11,10 @@ The public API lives in `include/trueskill/trueskill.hpp`.
 
 Higher `mu` is better. Lower `sigma` means the system is more certain.
 
-## `trueskill::Environment`
+## `skill_rating::Environment`
 
 `Environment` stores the algorithm parameters and performs calculations. The
-default constructor uses the standard TrueSkill values:
+default constructor uses the standard Bayesian skill rating values:
 
 - `mu = 25.0`
 - `sigma = 25.0 / 3.0`
@@ -53,7 +53,7 @@ For general matches, `rate(rating_groups, ranks)` uses `ranks` to describe the
 result:
 
 ```cpp
-trueskill::RatingGroups teams = {
+skill_rating::RatingGroups teams = {
     {team_a_player},
     {team_b_player},
     {team_c_player},

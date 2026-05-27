@@ -1,25 +1,34 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(trueskill_cpp VERSION 0.1.0 LANGUAGES CXX)
+project(skill_rating_cpp VERSION 0.1.0 LANGUAGES CXX)
 
 include(FetchContent)
+include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
 
-option(TRUESKILL_BUILD_TESTS "Build TrueSkill tests" ON)
-option(TRUESKILL_BUILD_CLI "Build TrueSkill CLI" ON)
-option(TRUESKILL_BUILD_HTTP "Build TrueSkill HTTP service" ON)
+option(SKILL_RATING_BUILD_TESTS "Build Bayesian skill rating tests" ON)
+option(SKILL_RATING_BUILD_CLI "Build Bayesian skill rating CLI" ON)
+option(SKILL_RATING_BUILD_HTTP "Build Bayesian skill rating HTTP service" ON)
 
 add_library(
-    trueskill
+    skill_rating
     src/detail/factor_graph.cpp
     src/detail/math.cpp
-    src/trueskill.cpp
+    src/skill_rating.cpp
 )
 
-add_library(trueskill::trueskill ALIAS trueskill)
+add_library(skill_rating::skill_rating ALIAS skill_rating)
+set_target_properties(
+    skill_rating
+    PROPERTIES
+        EXPORT_NAME skill_rating
+        VERSION ${PROJECT_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}
+)
 
-target_compile_features(trueskill PUBLIC cxx_std_20)
+target_compile_features(skill_rating PUBLIC cxx_std_20)
 target_include_directories(
-    trueskill
+    skill_rating
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -27,8 +36,9 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-if(TRUESKILL_BUILD_CLI OR TRUESKILL_BUILD_HTTP)
+if(SKILL_RATING_BUILD_CLI OR SKILL_RATING_BUILD_HTTP)
     set(JSON_BuildTests OFF CACHE INTERNAL "")
+    set(JSON_Install OFF CACHE INTERNAL "")
     FetchContent_Declare(
         nlohmann_json
         GIT_REPOSITORY https://github.com/nlohmann/json.git
@@ -37,22 +47,62 @@ if(TRUESKILL_BUILD_CLI OR TRUESKILL_BUILD_HTTP)
     FetchContent_MakeAvailable(nlohmann_json)
 
     add_library(
-        trueskill_app
+        skill_rating_app
         src/app/commands.cpp
         src/app/json.cpp
     )
-    target_compile_features(trueskill_app PUBLIC cxx_std_20)
-    target_include_directories(trueskill_app PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-    target_link_libraries(trueskill_app PUBLIC trueskill::trueskill nlohmann_json::nlohmann_json)
+    target_compile_features(skill_rating_app PUBLIC cxx_std_20)
+    target_include_directories(skill_rating_app PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(skill_rating_app PUBLIC skill_rating::skill_rating nlohmann_json::nlohmann_json)
 endif()
 
-if(TRUESKILL_BUILD_CLI)
-    add_executable(trueskill_cli src/cli/main.cpp)
-    target_include_directories(trueskill_cli PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-    target_link_libraries(trueskill_cli PRIVATE trueskill_app)
+install(
+    TARGETS skill_rating
+    EXPORT skill_rating_cppTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+    DIRECTORY include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/skill_rating_cppConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/skill_rating_cppConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/skill_rating_cppConfig.cmake"
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/skill_rating_cpp
+)
+
+install(
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/skill_rating_cppConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/skill_rating_cppConfigVersion.cmake"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/skill_rating_cpp
+)
+
+install(
+    EXPORT skill_rating_cppTargets
+    NAMESPACE skill_rating::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/skill_rating_cpp
+)
+
+if(SKILL_RATING_BUILD_CLI)
+    add_executable(skill_rating_cli src/cli/main.cpp)
+    target_include_directories(skill_rating_cli PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(skill_rating_cli PRIVATE skill_rating_app)
 endif()
 
-if(TRUESKILL_BUILD_HTTP)
+if(SKILL_RATING_BUILD_HTTP)
+    set(HTTPLIB_INSTALL OFF CACHE INTERNAL "")
     FetchContent_Declare(
         cpp_httplib
         GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
@@ -60,26 +110,30 @@ if(TRUESKILL_BUILD_HTTP)
     )
     FetchContent_MakeAvailable(cpp_httplib)
 
-    add_executable(trueskill_http src/http/main.cpp)
-    target_include_directories(trueskill_http PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-    target_link_libraries(trueskill_http PRIVATE trueskill_app httplib::httplib)
+    add_executable(skill_rating_http src/http/main.cpp)
+    target_include_directories(skill_rating_http PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(skill_rating_http PRIVATE skill_rating_app httplib::httplib)
 endif()
 
-if(TRUESKILL_BUILD_TESTS)
+if(SKILL_RATING_BUILD_TESTS)
     enable_testing()
-    add_executable(trueskill_tests tests/trueskill_tests.cpp)
-    target_link_libraries(trueskill_tests PRIVATE trueskill::trueskill)
-    add_test(NAME trueskill_tests COMMAND trueskill_tests)
-    if(TRUESKILL_BUILD_CLI)
+    add_executable(skill_rating_tests tests/skill_rating_tests.cpp)
+    target_link_libraries(skill_rating_tests PRIVATE skill_rating::skill_rating)
+    add_test(NAME skill_rating_tests COMMAND skill_rating_tests)
+    add_test(
+        NAME skill_rating_package_install_smoke
+        COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/package_install_smoke.sh ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+    )
+    if(SKILL_RATING_BUILD_CLI)
         add_test(
-            NAME trueskill_cli_smoke
-            COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/cli_smoke.sh $<TARGET_FILE:trueskill_cli>
+            NAME skill_rating_cli_smoke
+            COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/cli_smoke.sh $<TARGET_FILE:skill_rating_cli>
         )
     endif()
-    if(TRUESKILL_BUILD_HTTP)
+    if(SKILL_RATING_BUILD_HTTP)
         add_test(
-            NAME trueskill_http_smoke
-            COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/http_smoke.sh $<TARGET_FILE:trueskill_http> 18080
+            NAME skill_rating_http_smoke
+            COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/http_smoke.sh $<TARGET_FILE:skill_rating_http> 18080
         )
     endif()
 endif()

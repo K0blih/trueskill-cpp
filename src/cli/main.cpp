@@ -30,7 +30,7 @@ std::string read_input(int argc, char** argv) {
 
 void print_usage() {
     std::cerr
-        << "Usage: trueskill_cli <command> [input.json|-|json]\n"
+        << "Usage: skill_rating_cli <command> [input.json|-|json]\n"
         << "\nCommands:\n"
         << "  rate          Update arbitrary teams. Input keys: rating_groups, optional ranks, weights, environment, min_delta.\n"
         << "  rate-1vs1     Update two players. Input keys: first_player, second_player, optional drawn, environment, min_delta.\n"
@@ -44,7 +44,7 @@ int run(int argc, char** argv) {
         print_usage();
         return argc < 2 ? 1 : 0;
     }
-    std::cout << trueskill::app::run_command(argv[1], read_input(argc, argv)) << '\n';
+    std::cout << skill_rating::app::run_command(argv[1], read_input(argc, argv)) << '\n';
     return 0;
 }
 

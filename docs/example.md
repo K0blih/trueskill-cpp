@@ -5,17 +5,17 @@ quality, conservative exposure, multi-team matches, explicit ranks, and
 partial-play weights.
 
 ```cpp
-#include <trueskill/trueskill.hpp>
+#include <skill_rating/skill_rating.hpp>
 
 #include <iostream>
 #include <vector>
 
-void print_rating(const char* name, const trueskill::Rating& rating) {
+void print_rating(const char* name, const skill_rating::Rating& rating) {
     std::cout << name << ": mu=" << rating.mu << ", sigma=" << rating.sigma << '\n';
 }
 
 int main() {
-    trueskill::Environment env;
+    skill_rating::Environment env;
 
     auto player_a = env.create_rating();
     auto player_b = env.create_rating();
@@ -29,7 +29,7 @@ int main() {
     std::cout << "1v1 quality: " << env.quality_1vs1(player_a, player_b) << '\n';
     std::cout << "winner exposure: " << env.expose(winner) << '\n';
 
-    trueskill::RatingGroups teams = {
+    skill_rating::RatingGroups teams = {
         {env.create_rating(32.0, 7.0)},
         {env.create_rating(), env.create_rating(27.0, 6.0)},
         {env.create_rating(20.0, 8.0)},
@@ -40,14 +40,14 @@ int main() {
 
     // Weights match the same team/player shape. The second player on teams[1]
     // receives half participation credit.
-    trueskill::Weights weights = {
+    skill_rating::Weights weights = {
         {1.0},
         {1.0, 0.5},
         {1.0},
     };
 
     // Output keeps input order, so updated[1][0] belongs to teams[1][0].
-    trueskill::RatingGroups updated = env.rate(teams, ranks, weights);
+    skill_rating::RatingGroups updated = env.rate(teams, ranks, weights);
     print_rating("team 2 player 1", updated[1][0]);
     print_rating("team 2 player 2", updated[1][1]);
 

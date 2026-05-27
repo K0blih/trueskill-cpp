@@ -1,4 +1,4 @@
-#include "trueskill/trueskill.hpp"
+#include "skill_rating/skill_rating.hpp"
 
 #include <cmath>
 #include <functional>
@@ -43,7 +43,7 @@ void check_throws(Fn&& fn, std::string_view label) {
 }
 
 void defaults_and_exposure() {
-    const trueskill::Environment env;
+    const skill_rating::Environment env;
     const auto rating = env.create_rating();
     check_near(rating.mu, 25.0, 1e-12, "default mu");
     check_near(rating.sigma, 25.0 / 3.0, 1e-12, "default sigma");
@@ -51,13 +51,13 @@ void defaults_and_exposure() {
 }
 
 void one_vs_one_quality() {
-    const trueskill::Environment env;
+    const skill_rating::Environment env;
     const auto rating = env.create_rating();
     check_near(env.quality_1vs1(rating, rating), 0.447, 0.001, "1v1 quality");
 }
 
 void one_vs_one_win() {
-    const trueskill::Environment env;
+    const skill_rating::Environment env;
     const auto rating = env.create_rating();
     const auto [winner, loser] = env.rate_1vs1(rating, rating);
     check_near(winner.mu, 29.396, 0.01, "winner mu");
@@ -67,7 +67,7 @@ void one_vs_one_win() {
 }
 
 void one_vs_one_draw() {
-    const trueskill::Environment env;
+    const skill_rating::Environment env;
     const auto rating = env.create_rating();
     const auto [draw_a, draw_b] = env.rate_1vs1(rating, rating, true);
     check_near(draw_a.mu, 25.0, 0.01, "draw player A mu");
@@ -77,9 +77,9 @@ void one_vs_one_draw() {
 }
 
 void team_match() {
-    const trueskill::Environment env;
+    const skill_rating::Environment env;
     const auto rating = env.create_rating();
-    const trueskill::RatingGroups rated = env.rate({{rating}, {rating, rating}});
+    const skill_rating::RatingGroups rated = env.rate({{rating}, {rating, rating}});
     check_near(rated[0][0].mu, 33.731, 0.03, "solo winner mu");
     check_near(rated[0][0].sigma, 7.317, 0.03, "solo winner sigma");
     check_near(rated[1][0].mu, 16.269, 0.03, "team loser A mu");
@@ -89,18 +89,18 @@ void team_match() {
 }
 
 void ranks_and_draws() {
-    const trueskill::Environment env;
+    const skill_rating::Environment env;
     const auto rating = env.create_rating();
-    const trueskill::RatingGroups ranked = env.rate({{rating}, {rating}, {rating}}, {1, 0, 2});
+    const skill_rating::RatingGroups ranked = env.rate({{rating}, {rating}, {rating}}, {1, 0, 2});
     check(ranked[1][0].mu > ranked[0][0].mu, "best ranked player should gain most");
     check(ranked[0][0].mu > ranked[2][0].mu, "middle ranked player should beat worst ranked player");
 
-    const trueskill::RatingGroups drawn_groups = env.rate({{rating}, {rating}}, {0, 0});
+    const skill_rating::RatingGroups drawn_groups = env.rate({{rating}, {rating}}, {0, 0});
     check_near(drawn_groups[0][0].mu, drawn_groups[1][0].mu, 1e-9, "drawn groups should stay symmetric");
 }
 
 void partial_play_weights() {
-    const trueskill::Environment env;
+    const skill_rating::Environment env;
     const auto rating = env.create_rating();
     const auto full_weight = env.rate({{rating}, {rating}}, {}, {{{1.0}}, {{1.0}}});
     const auto half_weight = env.rate({{rating}, {rating}}, {}, {{{0.5}}, {{1.0}}});
@@ -110,13 +110,13 @@ void partial_play_weights() {
 }
 
 void zero_weight_players_are_unchanged() {
-    const trueskill::Environment env;
+    const skill_rating::Environment env;
     const auto active_winner = env.create_rating();
     const auto benched_winner = env.create_rating(40.0, 4.0);
     const auto active_loser = env.create_rating();
     const auto benched_loser = env.create_rating(10.0, 5.0);
 
-    const trueskill::RatingGroups rated = env.rate(
+    const skill_rating::RatingGroups rated = env.rate(
         {{active_winner, benched_winner}, {active_loser, benched_loser}},
         {0, 1},
         {{1.0, 0.0}, {1.0, 0.0}});
@@ -130,24 +130,24 @@ void zero_weight_players_are_unchanged() {
 }
 
 void custom_environment_and_draw_helpers() {
-    const trueskill::Environment env(30.0, 10.0, 5.0, 0.2, 0.2);
+    const skill_rating::Environment env(30.0, 10.0, 5.0, 0.2, 0.2);
     const auto rating = env.create_rating();
     check_near(rating.mu, 30.0, 1e-12, "custom default mu");
     check_near(rating.sigma, 10.0, 1e-12, "custom default sigma");
 
-    const double margin = trueskill::calc_draw_margin(0.2, 2, env.beta());
-    const double probability = trueskill::calc_draw_probability(margin, 2, env.beta());
+    const double margin = skill_rating::calc_draw_margin(0.2, 2, env.beta());
+    const double probability = skill_rating::calc_draw_probability(margin, 2, env.beta());
     check_near(probability, 0.2, 1e-10, "draw probability round trip");
 }
 
 void multi_team_quality_and_draws() {
-    const trueskill::Environment env;
+    const skill_rating::Environment env;
     const auto rating = env.create_rating();
-    const trueskill::RatingGroups groups = {{rating}, {rating}, {rating, rating}};
+    const skill_rating::RatingGroups groups = {{rating}, {rating}, {rating, rating}};
     const double quality = env.quality(groups);
     check(quality >= 0.0 && quality <= 1.0, "quality should be in [0, 1]");
 
-    const trueskill::RatingGroups rated = env.rate(groups, {0, 0, 2});
+    const skill_rating::RatingGroups rated = env.rate(groups, {0, 0, 2});
     check(rated[0][0].mu > rating.mu, "drawn winner team should gain rating");
     check(rated[1][0].mu > rating.mu, "other drawn winner team should gain rating");
     check(rated[2][0].mu < rating.mu, "last team should lose rating");
@@ -155,7 +155,7 @@ void multi_team_quality_and_draws() {
 }
 
 void validation_errors() {
-    const trueskill::Environment env;
+    const skill_rating::Environment env;
     const auto rating = env.create_rating();
     check_throws([&] { static_cast<void>(env.rate({{rating}})); }, "single team");
     check_throws([&] { static_cast<void>(env.rate({{}, {rating}})); }, "empty team");
@@ -163,8 +163,8 @@ void validation_errors() {
     check_throws([&] { static_cast<void>(env.rate({{rating}, {rating}}, {}, {{{1.0}}})); }, "weight count mismatch");
     check_throws([&] { static_cast<void>(env.rate({{rating}, {rating}}, {}, {{{0.0}}, {{1.0}}})); }, "team with no positive weight");
     check_throws([&] { static_cast<void>(env.quality({{rating}, {rating}}, {{{1.0}}, {{0.0}}})); }, "quality team with no positive weight");
-    check_throws([] { trueskill::Environment(25.0, 0.0, 1.0, 1.0, 0.1); }, "invalid sigma");
-    check_throws([] { trueskill::Environment(25.0, 1.0, 1.0, 1.0, 1.0); }, "invalid draw probability");
+    check_throws([] { skill_rating::Environment(25.0, 0.0, 1.0, 1.0, 0.1); }, "invalid sigma");
+    check_throws([] { skill_rating::Environment(25.0, 1.0, 1.0, 1.0, 1.0); }, "invalid draw probability");
 }
 
 } // namespace

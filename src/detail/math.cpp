@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace trueskill::detail {
+namespace skill_rating::detail {
 
 namespace {
 
@@ -139,4 +139,4 @@ std::vector<double> solve(std::vector<std::vector<double>> matrix, std::vector<d
     return rhs;
 }
 
-} // namespace trueskill::detail
+} // namespace skill_rating::detail

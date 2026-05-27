@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace trueskill::detail {
+namespace skill_rating::detail {
 
 struct Gaussian {
     double pi = 0.0;
@@ -45,4 +45,4 @@ double update_likelihood_mean(
 double update_sum(std::vector<Variable*>& variables, std::vector<Gaussian>& messages, const std::vector<double>& coeffs, std::size_t index);
 double update_trunc(Variable& variable, Gaussian& message, double draw_margin, bool draw);
 
-} // namespace trueskill::detail
+} // namespace skill_rating::detail

@@ -1,10 +1,10 @@
 # HTTP Service Usage
 
-The HTTP service target is `trueskill_http`. It uses `cpp-httplib` and exposes
+The HTTP service target is `skill_rating_http`. It uses `cpp-httplib` and exposes
 the same operations as the CLI using JSON request and response bodies.
 
 ```sh
-./build/trueskill_http --host 127.0.0.1 --port 8080
+./build/skill_rating_http --host 127.0.0.1 --port 8080
 ```
 
 ## Routes

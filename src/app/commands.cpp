@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace trueskill::app {
+namespace skill_rating::app {
 namespace {
 
 const Json* find(const Json& object, std::string_view key) {
@@ -80,4 +80,4 @@ std::string run_command(std::string_view command, std::string_view request_body)
     throw std::invalid_argument("unknown command: " + std::string(command));
 }
 
-} // namespace trueskill::app
+} // namespace skill_rating::app

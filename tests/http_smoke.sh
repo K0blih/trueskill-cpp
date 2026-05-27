@@ -11,12 +11,12 @@ contains() {
     esac
 }
 
-"$server" --host 127.0.0.1 --port "$port" >/tmp/trueskill_http_test.log 2>&1 &
+"$server" --host 127.0.0.1 --port "$port" >/tmp/skill_rating_http_test.log 2>&1 &
 pid="$!"
 trap 'kill "$pid" 2>/dev/null || true' EXIT
 
 for _ in 1 2 3 4 5 6 7 8 9 10; do
-    if curl -fsS "http://127.0.0.1:$port/health" >/tmp/trueskill_http_health.json 2>/dev/null; then
+    if curl -fsS "http://127.0.0.1:$port/health" >/tmp/skill_rating_http_health.json 2>/dev/null; then
         break
     fi
     sleep 0.1
@@ -59,14 +59,14 @@ contains "$rate" '"rating_groups"'
 contains "$rate" '28.391918161'
 contains "$rate" '17.815292649'
 
-bad_status="$(curl -sS -o /tmp/trueskill_http_bad.json -w '%{http_code}' \
+bad_status="$(curl -sS -o /tmp/skill_rating_http_bad.json -w '%{http_code}' \
     -H 'Content-Type: application/json' \
     -d '{"rating_groups":[[{"mu":25,"sigma":8.333333333333}]]}' \
     "http://127.0.0.1:$port/quality")"
 test "$bad_status" = "400"
-contains "$(cat /tmp/trueskill_http_bad.json)" 'at least two teams are required'
+contains "$(cat /tmp/skill_rating_http_bad.json)" 'at least two teams are required'
 
-missing_status="$(curl -sS -o /tmp/trueskill_http_missing.json -w '%{http_code}' \
+missing_status="$(curl -sS -o /tmp/skill_rating_http_missing.json -w '%{http_code}' \
     "http://127.0.0.1:$port/missing")"
 test "$missing_status" = "404"
-contains "$(cat /tmp/trueskill_http_missing.json)" 'unknown route'
+contains "$(cat /tmp/skill_rating_http_missing.json)" 'unknown route'

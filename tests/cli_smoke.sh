@@ -33,8 +33,8 @@ contains "$rate" '17.815292649'
 stdin_quality="$(printf '%s' '{"rating_groups":[[{"mu":25,"sigma":8.333333333333}],[{"mu":25,"sigma":8.333333333333}]]}' | "$cli" quality -)"
 contains "$stdin_quality" '"quality":0.4472135954'
 
-if "$cli" quality '{"rating_groups":[[{"mu":25,"sigma":8.333333333333}]]}' >/tmp/trueskill_cli_error.out 2>/tmp/trueskill_cli_error.err; then
+if "$cli" quality '{"rating_groups":[[{"mu":25,"sigma":8.333333333333}]]}' >/tmp/skill_rating_cli_error.out 2>/tmp/skill_rating_cli_error.err; then
     echo "expected invalid CLI request to fail" >&2
     exit 1
 fi
-contains "$(cat /tmp/trueskill_cli_error.err)" 'at least two teams are required'
+contains "$(cat /tmp/skill_rating_cli_error.err)" 'at least two teams are required'

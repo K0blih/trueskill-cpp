@@ -25,7 +25,7 @@ Config parse_args(int argc, char** argv) {
         } else if ((arg == "--port" || arg == "-p") && i + 1 < argc) {
             config.port = std::stoi(argv[++i]);
         } else if (arg == "--help") {
-            std::cout << "Usage: trueskill_http [--host 127.0.0.1] [--port 8080]\n";
+            std::cout << "Usage: skill_rating_http [--host 127.0.0.1] [--port 8080]\n";
             std::exit(0);
         } else {
             throw std::invalid_argument("unknown argument: " + arg);
@@ -45,11 +45,11 @@ void set_json(httplib::Response& response, int status, std::string body) {
 void register_command(httplib::Server& server, const char* route, const char* command) {
     server.Post(route, [command](const httplib::Request& request, httplib::Response& response) {
         try {
-            set_json(response, 200, trueskill::app::run_command(command, request.body));
+            set_json(response, 200, skill_rating::app::run_command(command, request.body));
         } catch (const std::invalid_argument& error) {
-            set_json(response, 400, trueskill::app::error_json(error.what()));
+            set_json(response, 400, skill_rating::app::error_json(error.what()));
         } catch (const std::exception& error) {
-            set_json(response, 500, trueskill::app::error_json(error.what()));
+            set_json(response, 500, skill_rating::app::error_json(error.what()));
         }
     });
 }
@@ -69,11 +69,11 @@ int run(int argc, char** argv) {
 
     server.set_error_handler([](const httplib::Request&, httplib::Response& response) {
         if (response.status == 404) {
-            set_json(response, 404, trueskill::app::error_json("unknown route"));
+            set_json(response, 404, skill_rating::app::error_json("unknown route"));
         }
     });
 
-    std::cout << "trueskill_http listening on http://" << config.host << ':' << config.port << '\n';
+    std::cout << "skill_rating_http listening on http://" << config.host << ':' << config.port << '\n';
     if (!server.listen(config.host, config.port)) {
         throw std::runtime_error("failed to listen on " + config.host + ":" + std::to_string(config.port));
     }

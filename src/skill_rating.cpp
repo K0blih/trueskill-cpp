@@ -1,4 +1,4 @@
-#include "trueskill/trueskill.hpp"
+#include "skill_rating/skill_rating.hpp"
 
 #include "detail/factor_graph.hpp"
 #include "detail/math.hpp"
@@ -8,7 +8,7 @@
 #include <numeric>
 #include <stdexcept>
 
-namespace trueskill {
+namespace skill_rating {
 namespace {
 
 using detail::Gaussian;
@@ -255,7 +255,7 @@ RatingGroups Environment::rate(
             break;
         }
         if (iteration == 99) {
-            throw std::runtime_error("TrueSkill rate update did not converge");
+            throw std::runtime_error("Bayesian skill rating rate update did not converge");
         }
     }
 
@@ -375,4 +375,4 @@ double calc_draw_probability(double draw_margin, std::size_t player_count, doubl
     return 2.0 * detail::normal_cdf(draw_margin / (std::sqrt(static_cast<double>(player_count)) * beta)) - 1.0;
 }
 
-} // namespace trueskill
+} // namespace skill_rating

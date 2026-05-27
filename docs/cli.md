@@ -1,10 +1,10 @@
 # CLI Usage
 
-The CLI target is `trueskill_cli`. It uses `nlohmann/json` and reads JSON from a
+The CLI target is `skill_rating_cli`. It uses `nlohmann/json` and reads JSON from a
 file, a JSON command argument, or stdin.
 
 ```sh
-./build/trueskill_cli <command> [input.json|-|json]
+./build/skill_rating_cli <command> [input.json|-|json]
 ```
 
 Commands:
@@ -30,7 +30,7 @@ Input:
 Command:
 
 ```sh
-./build/trueskill_cli rate-1vs1 input.json
+./build/skill_rating_cli rate-1vs1 input.json
 ```
 
 Output:
@@ -67,7 +67,7 @@ Input:
 Command:
 
 ```sh
-./build/trueskill_cli rate input.json
+./build/skill_rating_cli rate input.json
 ```
 
 Output:

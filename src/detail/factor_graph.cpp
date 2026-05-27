@@ -7,7 +7,7 @@
 #include <limits>
 #include <stdexcept>
 
-namespace trueskill::detail {
+namespace skill_rating::detail {
 
 Gaussian Gaussian::from_mu_sigma(double mu, double sigma) {
     require_finite_positive(sigma, "sigma");
@@ -154,4 +154,4 @@ double update_trunc(Variable& variable, Gaussian& message, double draw_margin, b
     return set_message(variable, message, next_value / cavity);
 }
 
-} // namespace trueskill::detail
+} // namespace skill_rating::detail

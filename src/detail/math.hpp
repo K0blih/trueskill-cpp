@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace trueskill::detail {
+namespace skill_rating::detail {
 
 constexpr double kEpsilon = 1e-12;
 
@@ -18,4 +18,4 @@ void require_probability(double value, const char* name);
 [[nodiscard]] double determinant(std::vector<std::vector<double>> matrix);
 [[nodiscard]] std::vector<double> solve(std::vector<std::vector<double>> matrix, std::vector<double> rhs);
 
-} // namespace trueskill::detail
+} // namespace skill_rating::detail

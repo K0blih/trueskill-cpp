@@ -1,6 +1,6 @@
 #pragma once
 
-#include "trueskill/trueskill.hpp"
+#include "skill_rating/skill_rating.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -8,7 +8,7 @@
 #include <string_view>
 #include <vector>
 
-namespace trueskill::app {
+namespace skill_rating::app {
 
 using Json = nlohmann::json;
 
@@ -24,4 +24,4 @@ using Json = nlohmann::json;
 [[nodiscard]] Json rating_groups_json(const RatingGroups& groups);
 [[nodiscard]] std::string error_json(std::string_view message);
 
-} // namespace trueskill::app
+} // namespace skill_rating::app
